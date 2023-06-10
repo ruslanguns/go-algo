@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Value struct {
 	data int
@@ -15,6 +18,10 @@ type LinkedList struct {
 	head *Node
 	tail *Node
 	len  int
+}
+
+func NewLinkedList() *LinkedList {
+	return &LinkedList{}
 }
 
 func (l *LinkedList) prepend(data *Value) {
@@ -80,19 +87,25 @@ func (l *LinkedList) pop() (*Value, error) {
 		return nil, fmt.Errorf("cannot pop from empty list")
 	}
 
-	currentNode := l.head
-	previousNode := l.head
+	removedNode := l.tail
 
-	for currentNode.next != nil {
-		previousNode = currentNode
+	if l.head == l.tail {
+		l.head = nil
+		l.tail = nil
+		l.len = 0
+		return removedNode.value, nil
+	}
+
+	currentNode := l.head
+	for currentNode.next != l.tail {
 		currentNode = currentNode.next
 	}
 
-	previousNode.next = nil
-	l.tail = previousNode
+	currentNode.next = nil
+	l.tail = currentNode
 	l.len--
 
-	return currentNode.value, nil
+	return removedNode.value, nil
 }
 
 func (l *LinkedList) shift() (*Value, error) {
@@ -104,6 +117,10 @@ func (l *LinkedList) shift() (*Value, error) {
 	l.head = l.head.next
 	l.len--
 
+	if l.head == nil {
+		l.tail = nil
+	}
+
 	return removedNode.value, nil
 }
 
@@ -114,24 +131,27 @@ func (l *LinkedList) delete(index int) (*Value, error) {
 
 	if index == 0 {
 		return l.shift()
-	} else if index == l.len-1 {
-		return l.pop()
-	} else {
-		currentNode := l.head
-		currentIndex := 0
-
-		// Traverse to the node before the index
-		for currentIndex < index-1 {
-			currentNode = currentNode.next
-			currentIndex++
-		}
-
-		removedNode := currentNode.next
-		currentNode.next = removedNode.next
-		l.len--
-
-		return removedNode.value, nil
 	}
+
+	currentNode := l.head
+	currentIndex := 0
+
+	// Traverse to the node before the index
+	for currentIndex < index {
+		currentNode = currentNode.next
+		currentIndex++
+	}
+
+	removedNode := currentNode.next
+	currentNode.next = removedNode.next
+
+	if removedNode == l.tail {
+		l.tail = currentNode
+	}
+
+	l.len--
+
+	return removedNode.value, nil
 }
 
 func (l *LinkedList) firstIndexOf(data *Value) (int, error) {
@@ -155,45 +175,28 @@ func (l *LinkedList) firstIndexOf(data *Value) (int, error) {
 }
 
 func (l *LinkedList) get(index int) (*Value, error) {
-	if index < 0 || index >= l.len {
+	if index < 0 || index > l.len-1 {
 		return nil, fmt.Errorf("index out of range")
 	}
 
 	currentNode := l.head
 	currentIndex := 0
 
-	for currentNode != nil {
-		if currentIndex == index {
-			return currentNode.value, nil
-		}
-
+	for currentIndex < index {
 		currentNode = currentNode.next
 		currentIndex++
 	}
 
-	return nil, fmt.Errorf("index out of range")
+	return currentNode.value, nil
 }
 
 func (l *LinkedList) contains(data *Value) bool {
-	if l.head == nil {
-		return false
-	}
-
-	currentNode := l.head
-
-	for currentNode != nil {
-		if currentNode.value.data == data.data {
-			return true
-		}
-
-		currentNode = currentNode.next
-	}
-
-	return false
+	_, err := l.firstIndexOf(data)
+	return err == nil
 }
 
 func (l *LinkedList) isEmpty() bool {
-	return l.head == nil
+	return l.len == 0
 }
 
 func (l *LinkedList) clear() {
@@ -203,11 +206,11 @@ func (l *LinkedList) clear() {
 }
 
 func (l *LinkedList) toArray() []*Value {
-	values := make([]*Value, 0, l.len)
+	values := make([]*Value, l.len)
 	currentNode := l.head
 
-	for currentNode != nil {
-		values = append(values, currentNode.value)
+	for i := 0; i < l.len; i++ {
+		values[i] = currentNode.value
 		currentNode = currentNode.next
 	}
 
@@ -234,24 +237,20 @@ func (l *LinkedList) reverse() {
 	l.head = prevNode
 }
 
-func (l *LinkedList) printData() {
-	if l.head == nil {
-		fmt.Println("LinkedList is empty")
-		return
+func (l *LinkedList) String() string {
+	var builder strings.Builder
+	currentNode := l.head
+
+	for currentNode != nil {
+		fmt.Fprintf(&builder, "%v ", currentNode.value.data)
+		currentNode = currentNode.next
 	}
 
-	values := l.toArray()
-
-	fmt.Print("Data: ")
-	for _, value := range values {
-		fmt.Printf("%v ", value.data)
-	}
-	fmt.Println()
-	fmt.Printf("Length: %d\n", l.len)
+	return builder.String()
 }
 
 func main() {
-	list := LinkedList{}
+	list := NewLinkedList()
 
 	fmt.Printf("Is list empty? %t\n", list.isEmpty())
 
@@ -270,7 +269,10 @@ func main() {
 	}
 
 	fmt.Println()
-	idxToSearch := []int{4, 7, 10, 20}
+	fmt.Printf("Data: %s\n", list)
+
+	fmt.Println()
+	idxToSearch := []int{4, 7, 9, 10, 20}
 	for _, index := range idxToSearch {
 		value, err := list.get(index)
 		if err != nil {
@@ -281,7 +283,7 @@ func main() {
 	}
 
 	fmt.Println()
-	list.printData()
+	fmt.Printf("Data: %s\n", list)
 
 	// Insert a new value at index 3
 	err := list.insert(3, &Value{data: 99})
@@ -290,7 +292,7 @@ func main() {
 	}
 
 	fmt.Println()
-	list.printData()
+	fmt.Printf("Data: %s\n", list)
 
 	// Pop the last value
 	value, err := list.pop()
@@ -300,7 +302,7 @@ func main() {
 	} else {
 		fmt.Printf("Popped Value: %d\n", value.data)
 	}
-	list.printData()
+	fmt.Printf("Data: %s\n", list)
 
 	// Shift the first value
 	value, err = list.shift()
@@ -310,7 +312,7 @@ func main() {
 	} else {
 		fmt.Printf("Shifted Value: %d\n", value.data)
 	}
-	list.printData()
+	fmt.Printf("Data: %s\n", list)
 
 	// Search for a value
 	valueToSearch := 99
@@ -333,14 +335,14 @@ func main() {
 
 	// Delete at index 3
 	fmt.Println()
-	list.printData()
+	fmt.Printf("Data: %s\n", list)
 	value, err = list.delete(3)
 	if err != nil {
 		fmt.Println("Delete Error:", err)
 	} else {
 		fmt.Printf("Deleted Value: %d\n", value.data)
 	}
-	list.printData()
+	fmt.Printf("Data: %s\n", list)
 
 	// Contains 100?
 	fmt.Println()
@@ -350,7 +352,7 @@ func main() {
 	fmt.Println()
 	list.clear()
 	fmt.Println()
-	list.printData()
+	fmt.Printf("Data: %s\n", list)
 
 	// Contains 100?
 	fmt.Println()
@@ -362,10 +364,10 @@ func main() {
 	for i := 1; i <= 10; i++ {
 		list.append(&Value{data: i})
 	}
-	list.printData()
+	fmt.Printf("Data: %s\n", list)
 
 	// Reverse the list
 	fmt.Println()
 	list.reverse()
-	list.printData()
+	fmt.Printf("Data reversed: %s\n", list)
 }
