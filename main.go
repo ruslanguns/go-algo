@@ -1,100 +1,113 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
-// MaxHeap struct has a slice that holds the array
-type MaxHeap struct {
-	array []int
+type Value struct {
+	data int
 }
 
-// Insert adds an element to the heap
-func (h *MaxHeap) Insert(key int) {
-	h.array = append(h.array, key)
-	h.maxHeapifyUp(len(h.array) - 1)
+type Node struct {
+	value *Value
+	next  *Node
 }
 
-// Extract returns the largest key, and removes it from the heap
-func (h *MaxHeap) Extract() int {
-	extracted := h.array[0]
+type Queue struct {
+	front *Node
+	rear  *Node
+	len   int
+}
 
-	l := len(h.array) - 1
+func NewQueue() *Queue {
+	return &Queue{}
+}
 
-	if len(h.array) == 0 {
-		fmt.Println("cannot extract because array length is 0")
-		return -1
+func (q *Queue) enqueue(data *Value) {
+	newNode := &Node{value: data, next: nil}
+
+	if q.rear == nil {
+		q.front = newNode
+		q.rear = newNode
+	} else {
+		q.rear.next = newNode
+		q.rear = newNode
 	}
 
-	h.array[0] = h.array[l] // swap first and last
-	h.array = h.array[:l]   // makes the slice smaller by one
-
-	h.maxHeapifyDown(0)
-
-	return extracted
+	q.len++
 }
 
-// maxHeapifyDown will heapify from top to bottom
-func (h *MaxHeap) maxHeapifyDown(index int) {
-	lastIndex := len(h.array) - 1
-	l, r := left(index), right(index)
-	childToCompare := 0
-
-	for l <= lastIndex { // if left child exists
-		if l == lastIndex { // if right child doesn't exist
-			childToCompare = l
-		} else if h.array[l] > h.array[r] { // if left child is larger
-			childToCompare = l
-		} else { // if right child is larger
-			childToCompare = r
-		}
-
-		// compare array value of current index to larger child and swap if smaller
-		if h.array[index] < h.array[childToCompare] {
-			h.swap(index, childToCompare)
-			index = childToCompare
-			l, r = left(index), right(index)
-		} else {
-			return
-		}
+func (q *Queue) dequeue() (*Value, error) {
+	if q.front == nil {
+		return nil, fmt.Errorf("cannot dequeue from empty queue")
 	}
-}
 
-// maxHeapifyUp will heapify from bottom to top
-func (h *MaxHeap) maxHeapifyUp(index int) {
-	for h.array[parent(index)] < h.array[index] {
-		h.swap(parent(index), index)
-		index = parent(index)
+	value := q.front.value
+	q.front = q.front.next
+
+	if q.front == nil {
+		q.rear = nil
 	}
+
+	q.len--
+
+	return value, nil
 }
 
-func parent(i int) int {
-	return (i - 1) / 2
+func (q *Queue) isEmpty() bool {
+	return q.front == nil
 }
 
-func left(i int) int {
-	return 2*i + 1
+func (q *Queue) clear() {
+	q.front = nil
+	q.rear = nil
+	q.len = 0
 }
 
-func right(i int) int {
-	return 2*i + 2
-}
+func (q *Queue) String() string {
+	if q.front == nil {
+		return "Queue is empty"
+	}
 
-// swap keys in the array at index i and j
-func (h *MaxHeap) swap(i, j int) {
-	h.array[i], h.array[j] = h.array[j], h.array[i]
+	var builder strings.Builder
+	currentNode := q.front
+
+	for currentNode != nil {
+		fmt.Fprintf(&builder, "%v ", currentNode.value.data)
+		currentNode = currentNode.next
+	}
+
+	return builder.String()
 }
 
 func main() {
-	m := &MaxHeap{}
-	fmt.Println(m)
-	buildHeap := []int{10, 20, 30, 5, 7, 9, 11, 13, 15, 17}
-	for _, v := range buildHeap {
-		m.Insert(v)
-		fmt.Println(m)
+	queue := NewQueue()
+
+	fmt.Printf("Is queue empty? %t\n", queue.isEmpty())
+
+	values := []int{5, 10, 15, 20, 25, 30, 35, 40}
+
+	for _, value := range values {
+		queue.enqueue(&Value{data: value})
 	}
 
-	for i := 0; i < 9; i++ {
-		fmt.Println(m.Extract())
-		fmt.Println(m)
+	fmt.Println("...Enqueued values to the queue")
+
+	fmt.Printf("Is queue empty? %t\n", queue.isEmpty())
+
+	fmt.Printf("Queue: %s\n", queue)
+
+	// Dequeue until queue is empty
+	for !queue.isEmpty() {
+		value, _ := queue.dequeue()
+		fmt.Printf("Dequeued: %d\n", value.data)
+		fmt.Printf("Queue: %s\n", queue)
 	}
 
+	// Clear the queue
+	fmt.Println()
+	queue.clear()
+	fmt.Println()
+	fmt.Printf("Queue: %s\n", queue)
 }
