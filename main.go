@@ -182,6 +182,10 @@ func (l *LinkedList) traverseIndex(index int) (*Value, error) {
 	return nil, fmt.Errorf("index out of range")
 }
 
+func (l *LinkedList) isEmpty() bool {
+	return l.head == nil
+}
+
 func (l *LinkedList) printData() {
 	if l.head == nil {
 		fmt.Println("LinkedList is empty")
@@ -202,10 +206,14 @@ func (l *LinkedList) printData() {
 func main() {
 	list := LinkedList{}
 
+	fmt.Printf("Is list empty? %t\n", list.isEmpty())
+
 	idxToPrepend := []int{5, 10, 15, 20, 25, 30, 35, 40}
 	for _, index := range idxToPrepend {
 		list.prepend(&Value{data: index})
 	}
+
+	fmt.Printf("Is list empty? %t\n", list.isEmpty())
 
 	idxToAppend := []int{60, 65, 70}
 	for _, index := range idxToAppend {
