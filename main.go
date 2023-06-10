@@ -83,6 +83,26 @@ func (l *LinkedList) insert(index int, data *Value) error {
 	return nil
 }
 
+func (l *LinkedList) pop() (*Value, error) {
+	if l.head == nil {
+		return nil, fmt.Errorf("cannot pop from empty list")
+	}
+
+	currentNode := l.head
+	previousNode := l.head
+
+	for currentNode.next != nil {
+		previousNode = currentNode
+		currentNode = currentNode.next
+	}
+
+	previousNode.next = nil
+	l.tail = previousNode
+	l.len--
+
+	return currentNode.value, nil
+}
+
 func (l *LinkedList) traverseIndex(index int) (*Value, error) {
 	if index < 0 || index >= l.len {
 		return nil, fmt.Errorf("index out of range")
@@ -103,13 +123,13 @@ func (l *LinkedList) traverseIndex(index int) (*Value, error) {
 	return nil, fmt.Errorf("index out of range")
 }
 
-func (ll *LinkedList) printData() {
-	if ll.head == nil {
+func (l *LinkedList) printData() {
+	if l.head == nil {
 		fmt.Println("LinkedList is empty")
 		return
 	}
 
-	currentNode := ll.head
+	currentNode := l.head
 
 	fmt.Print("Data: ")
 	for currentNode != nil {
@@ -117,6 +137,7 @@ func (ll *LinkedList) printData() {
 		currentNode = currentNode.next
 	}
 	fmt.Println()
+	fmt.Printf("Length: %d\n", l.len)
 }
 
 func main() {
@@ -144,7 +165,6 @@ func main() {
 
 	fmt.Println()
 	list.printData()
-	fmt.Printf("Length: %d\n", list.len)
 
 	// Insert a new value at index 3
 	err := list.insert(3, &Value{data: 99})
@@ -154,5 +174,14 @@ func main() {
 
 	fmt.Println()
 	list.printData()
-	fmt.Printf("Length: %d\n", list.len)
+
+	// Pop the last value
+	value, err := list.pop()
+	fmt.Println()
+	if err != nil {
+		fmt.Println("Pop Error:", err)
+	} else {
+		fmt.Printf("Popped Value: %d\n", value.data)
+	}
+	list.printData()
 }
