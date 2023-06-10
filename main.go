@@ -2,8 +2,20 @@ package main
 
 import "fmt"
 
+type Value struct {
+	// Define fields based on your requirements for the value object
+	// For example, if you want to store an integer value:
+	// data int
+	//
+	// Or, if you want to store a string value:
+	// data string
+	//
+	// You can customize the fields based on the specific data type you need.
+	data int
+}
+
 type Node struct {
-	value int
+	value *Value
 	next  *Node
 }
 
@@ -13,7 +25,7 @@ type LinkedList struct {
 	len  int
 }
 
-func (l *LinkedList) prepend(data int) {
+func (l *LinkedList) prepend(data *Value) {
 	newNode := &Node{value: data, next: nil}
 
 	if l.head == nil {
@@ -27,7 +39,7 @@ func (l *LinkedList) prepend(data int) {
 	l.len++
 }
 
-func (l *LinkedList) append(data int) {
+func (l *LinkedList) append(data *Value) {
 	newNode := &Node{value: data, next: nil}
 
 	if l.head == nil {
@@ -41,31 +53,66 @@ func (l *LinkedList) append(data int) {
 	l.len++
 }
 
-func (l LinkedList) printListData() {
-	toPrint := l.head
-	for l.len != 0 {
-		fmt.Printf("%d ", toPrint.value)
-		toPrint = toPrint.next
-		l.len--
+func (l *LinkedList) traverseIndex(index int) (*Value, error) {
+	if index < 0 || index >= l.len {
+		return nil, fmt.Errorf("index out of range")
+	}
+
+	currentNode := l.head
+	currentIndex := 0
+
+	for currentNode != nil {
+		if currentIndex == index {
+			return currentNode.value, nil
+		}
+
+		currentNode = currentNode.next
+		currentIndex++
+	}
+
+	return nil, fmt.Errorf("index out of range")
+}
+
+func (ll *LinkedList) printData() {
+	if ll.head == nil {
+		fmt.Println("LinkedList is empty")
+		return
+	}
+
+	currentNode := ll.head
+
+	fmt.Print("Data: ")
+	for currentNode != nil {
+		fmt.Printf("%v ", currentNode.value.data)
+		currentNode = currentNode.next
 	}
 	fmt.Println()
 }
 
 func main() {
-	myLinkedList := LinkedList{}
-	myLinkedList.prepend(5)
-	myLinkedList.prepend(10)
-	myLinkedList.prepend(15)
-	myLinkedList.prepend(20)
-	myLinkedList.prepend(25)
-	myLinkedList.prepend(30)
-	myLinkedList.prepend(35)
-	myLinkedList.prepend(40)
+	list := LinkedList{}
 
-	myLinkedList.append(45)
-	myLinkedList.append(65)
-	myLinkedList.append(15)
+	idxToPrepend := []int{5, 10, 15, 20, 25, 30, 35, 40}
+	for _, index := range idxToPrepend {
+		list.prepend(&Value{data: index})
+	}
 
-	myLinkedList.printListData()
-	fmt.Printf("Length: %d\n", myLinkedList.len)
+	idxToAppend := []int{60, 65, 70}
+	for _, index := range idxToAppend {
+		list.append(&Value{data: index})
+	}
+
+	idxToSearch := []int{4, 7, 10, 20}
+	for _, index := range idxToSearch {
+		value, err := list.traverseIndex(index)
+		if err != nil {
+			fmt.Printf("Value at index %d: %s\n", index, err)
+		} else {
+			fmt.Printf("Value at index %d: %d\n", index, value.data)
+		}
+	}
+
+	fmt.Println()
+	list.printData()
+	fmt.Printf("Length: %d\n", list.len)
 }
