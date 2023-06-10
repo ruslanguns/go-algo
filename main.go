@@ -2,99 +2,142 @@ package main
 
 import "fmt"
 
-// MaxHeap struct has a slice that holds the array
-type MaxHeap struct {
-	array []int
+type Node struct {
+	key   int
+	left  *Node
+	right *Node
 }
 
-// Insert adds an element to the heap
-func (h *MaxHeap) Insert(key int) {
-	h.array = append(h.array, key)
-	h.maxHeapifyUp(len(h.array) - 1)
+type BinarySearchTree struct {
+	root *Node
 }
 
-// Extract returns the largest key, and removes it from the heap
-func (h *MaxHeap) Extract() int {
-	extracted := h.array[0]
+func (bst *BinarySearchTree) insert(key int) {
+	newNode := &Node{key: key, left: nil, right: nil}
 
-	l := len(h.array) - 1
-
-	if len(h.array) == 0 {
-		fmt.Println("cannot extract because array length is 0")
-		return -1
+	if bst.root == nil {
+		bst.root = newNode
+	} else {
+		bst.insertNode(bst.root, newNode)
 	}
-
-	h.array[0] = h.array[l] // swap first and last
-	h.array = h.array[:l]   // makes the slice smaller by one
-
-	h.maxHeapifyDown(0)
-
-	return extracted
 }
 
-// maxHeapifyDown will heapify from top to bottom
-func (h *MaxHeap) maxHeapifyDown(index int) {
-	lastIndex := len(h.array) - 1
-	l, r := left(index), right(index)
-	childToCompare := 0
-
-	for l <= lastIndex { // if left child exists
-		if l == lastIndex { // if right child doesn't exist
-			childToCompare = l
-		} else if h.array[l] > h.array[r] { // if left child is larger
-			childToCompare = l
-		} else { // if right child is larger
-			childToCompare = r
-		}
-
-		// compare array value of current index to larger child and swap if smaller
-		if h.array[index] < h.array[childToCompare] {
-			h.swap(index, childToCompare)
-			index = childToCompare
-			l, r = left(index), right(index)
+func (bst *BinarySearchTree) insertNode(node *Node, newNode *Node) {
+	if newNode.key < node.key {
+		if node.left == nil {
+			node.left = newNode
 		} else {
-			return
+			bst.insertNode(node.left, newNode)
+		}
+	} else {
+		if node.right == nil {
+			node.right = newNode
+		} else {
+			bst.insertNode(node.right, newNode)
 		}
 	}
 }
 
-// maxHeapifyUp will heapify from bottom to top
-func (h *MaxHeap) maxHeapifyUp(index int) {
-	for h.array[parent(index)] < h.array[index] {
-		h.swap(parent(index), index)
-		index = parent(index)
+func (bst *BinarySearchTree) search(key int) bool {
+	return bst.searchNode(bst.root, key)
+}
+
+func (bst *BinarySearchTree) searchNode(node *Node, key int) bool {
+	if node == nil {
+		return false
+	}
+
+	if key == node.key {
+		return true
+	} else if key < node.key {
+		return bst.searchNode(node.left, key)
+	} else {
+		return bst.searchNode(node.right, key)
 	}
 }
 
-func parent(i int) int {
-	return (i - 1) / 2
+func (bst *BinarySearchTree) remove(key int) {
+	bst.root = bst.removeNode(bst.root, key)
 }
 
-func left(i int) int {
-	return 2*i + 1
+func (bst *BinarySearchTree) removeNode(node *Node, key int) *Node {
+	if node == nil {
+		return nil
+	}
+
+	if key < node.key {
+		node.left = bst.removeNode(node.left, key)
+	} else if key > node.key {
+		node.right = bst.removeNode(node.right, key)
+	} else {
+		// Case 1: No child or only one child
+		if node.left == nil {
+			return node.right
+		} else if node.right == nil {
+			return node.left
+		}
+
+		// Case 2: Two children
+		minNode := bst.findMinNode(node.right)
+		node.key = minNode.key
+		node.right = bst.removeNode(node.right, minNode.key)
+	}
+
+	return node
 }
 
-func right(i int) int {
-	return 2*i + 2
+func (bst *BinarySearchTree) findMinNode(node *Node) *Node {
+	if node == nil || node.left == nil {
+		return node
+	}
+
+	return bst.findMinNode(node.left)
 }
 
-// swap keys in the array at index i and j
-func (h *MaxHeap) swap(i, j int) {
-	h.array[i], h.array[j] = h.array[j], h.array[i]
+func (bst *BinarySearchTree) inOrderTraversal() {
+	bst.inOrder(bst.root)
+	fmt.Println()
+}
+
+func (bst *BinarySearchTree) inOrder(node *Node) {
+	if node != nil {
+		bst.inOrder(node.left)
+		fmt.Printf("%d ", node.key)
+		bst.inOrder(node.right)
+	}
 }
 
 func main() {
-	m := &MaxHeap{}
-	fmt.Println(m)
-	buildHeap := []int{10, 20, 30, 5, 7, 9, 11, 13, 15, 17}
-	for _, v := range buildHeap {
-		m.Insert(v)
-		fmt.Println(m)
+	bst := BinarySearchTree{}
+
+	// Insert nodes
+	bst.insert(50)
+	bst.insert(30)
+	bst.insert(20)
+	bst.insert(40)
+	bst.insert(70)
+	bst.insert(60)
+	bst.insert(80)
+
+	// Perform in-order traversal
+	fmt.Println("In-order Traversal:")
+	bst.inOrderTraversal()
+
+	// Search for a key
+	key := 40
+	found := bst.search(key)
+	if found {
+		fmt.Printf("Key %d found in the Binary Search Tree\n", key)
+	} else {
+		fmt.Printf("Key %d not found in the Binary Search Tree\n", key)
 	}
 
-	for i := 0; i < 9; i++ {
-		fmt.Println(m.Extract())
-		fmt.Println(m)
-	}
+	// Remove a key
+	keyToRemove := 30
+	bst.remove(keyToRemove)
+	fmt.Printf("Key %d removed from the Binary Search Tree\n", keyToRemove)
 
+	// Perform in-order traversal after removal
+	fmt.Println("In-order Traversal after Removal:")
+	bst.inOrderTraversal()
 }
