@@ -115,7 +115,7 @@ func (l *LinkedList) shift() (*Value, error) {
 	return removedNode.value, nil
 }
 
-func (l *LinkedList) search(data *Value) (int, error) {
+func (l *LinkedList) searchFirst(data *Value) (int, error) {
 	if l.head == nil {
 		return -1, fmt.Errorf("cannot search empty list")
 	}
@@ -217,16 +217,6 @@ func main() {
 	}
 	list.printData()
 
-	// Search for a value
-	valueToSearch := 99
-	index, err := list.search(&Value{data: valueToSearch})
-	fmt.Println()
-	if err != nil {
-		fmt.Printf("Search Error: %s\n", err)
-	} else {
-		fmt.Printf("Value %d found at index %d\n", valueToSearch, index)
-	}
-
 	// Shift the first value
 	value, err = list.shift()
 	fmt.Println()
@@ -237,9 +227,35 @@ func main() {
 	}
 	list.printData()
 
+	// Search for a value
+	valueToSearch := 99
+	index, err := list.searchFirst(&Value{data: valueToSearch})
+	fmt.Println()
+	if err != nil {
+		fmt.Printf("Search Error: %s\n", err)
+	} else {
+		fmt.Printf("Value %d found at index %d\n", valueToSearch, index)
+	}
+
 	// Search for a value that does not exist
 	valueToSearch = 100
-	index, err = list.search(&Value{data: valueToSearch})
+	index, err = list.searchFirst(&Value{data: valueToSearch})
+	if err != nil {
+		fmt.Printf("Error on search index %d: %s\n", valueToSearch, err)
+	} else {
+		fmt.Printf("Value %d found at index %d\n", valueToSearch, index)
+	}
+
+	// Add 100 to the end of the list two times
+	list.append(&Value{data: 100})
+	list.append(&Value{data: 100})
+
+	fmt.Println("Added 100 two times to the end of the list")
+	list.printData()
+
+	// Search for a value that exists multiple times
+	valueToSearch = 100
+	index, err = list.searchFirst(&Value{data: valueToSearch})
 	if err != nil {
 		fmt.Printf("Error on search index %d: %s\n", valueToSearch, err)
 	} else {
