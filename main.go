@@ -115,6 +115,33 @@ func (l *LinkedList) shift() (*Value, error) {
 	return removedNode.value, nil
 }
 
+func (l *LinkedList) delete(index int) (*Value, error) {
+	if index < 0 || index >= l.len {
+		return nil, fmt.Errorf("index out of range")
+	}
+
+	if index == 0 {
+		return l.shift()
+	} else if index == l.len-1 {
+		return l.pop()
+	} else {
+		currentNode := l.head
+		currentIndex := 0
+
+		// Traverse to the node before the index
+		for currentIndex < index-1 {
+			currentNode = currentNode.next
+			currentIndex++
+		}
+
+		removedNode := currentNode.next
+		currentNode.next = removedNode.next
+		l.len--
+
+		return removedNode.value, nil
+	}
+}
+
 func (l *LinkedList) searchFirst(data *Value) (int, error) {
 	if l.head == nil {
 		return -1, fmt.Errorf("cannot search empty list")
@@ -261,4 +288,15 @@ func main() {
 	} else {
 		fmt.Printf("Value %d found at index %d\n", valueToSearch, index)
 	}
+
+	// Delete at index 3
+	fmt.Println()
+	list.printData()
+	value, err = list.delete(3)
+	if err != nil {
+		fmt.Println("Delete Error:", err)
+	} else {
+		fmt.Printf("Deleted Value: %d\n", value.data)
+	}
+	list.printData()
 }
