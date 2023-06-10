@@ -2,99 +2,278 @@ package main
 
 import "fmt"
 
-// MaxHeap struct has a slice that holds the array
-type MaxHeap struct {
-	array []int
+type Value struct {
+	data int
 }
 
-// Insert adds an element to the heap
-func (h *MaxHeap) Insert(key int) {
-	h.array = append(h.array, key)
-	h.maxHeapifyUp(len(h.array) - 1)
+type Node struct {
+	value *Value
+	next  *Node
+	prev  *Node
 }
 
-// Extract returns the largest key, and removes it from the heap
-func (h *MaxHeap) Extract() int {
-	extracted := h.array[0]
+type DoublyLinkedList struct {
+	head *Node
+	tail *Node
+	len  int
+}
 
-	l := len(h.array) - 1
+func (dl *DoublyLinkedList) Prepend(data *Value) {
+	newNode := &Node{value: data, next: dl.head, prev: nil}
 
-	if len(h.array) == 0 {
-		fmt.Println("cannot extract because array length is 0")
-		return -1
+	if dl.head == nil {
+		dl.head = newNode
+		dl.tail = newNode
+	} else {
+		dl.head.prev = newNode
+		dl.head = newNode
 	}
 
-	h.array[0] = h.array[l] // swap first and last
-	h.array = h.array[:l]   // makes the slice smaller by one
-
-	h.maxHeapifyDown(0)
-
-	return extracted
+	dl.len++
 }
 
-// maxHeapifyDown will heapify from top to bottom
-func (h *MaxHeap) maxHeapifyDown(index int) {
-	lastIndex := len(h.array) - 1
-	l, r := left(index), right(index)
-	childToCompare := 0
+func (dl *DoublyLinkedList) Append(data *Value) {
+	newNode := &Node{value: data, next: nil, prev: dl.tail}
 
-	for l <= lastIndex { // if left child exists
-		if l == lastIndex { // if right child doesn't exist
-			childToCompare = l
-		} else if h.array[l] > h.array[r] { // if left child is larger
-			childToCompare = l
-		} else { // if right child is larger
-			childToCompare = r
+	if dl.head == nil {
+		dl.head = newNode
+		dl.tail = newNode
+	} else {
+		dl.tail.next = newNode
+		dl.tail = newNode
+	}
+
+	dl.len++
+}
+
+func (dl *DoublyLinkedList) Insert(index int, data *Value) error {
+	if (index < 0 || index >= dl.len) && dl.len > 0 {
+		return fmt.Errorf("index out of range")
+	}
+
+	if index == 0 {
+		dl.Prepend(data)
+	} else if index == dl.len-1 {
+		dl.Append(data)
+	} else {
+		newNode := &Node{value: data}
+
+		currentNode := dl.head
+		currentIndex := 0
+
+		// Traverse to the node before the index
+		for currentIndex < index-1 {
+			currentNode = currentNode.next
+			currentIndex++
 		}
 
-		// compare array value of current index to larger child and swap if smaller
-		if h.array[index] < h.array[childToCompare] {
-			h.swap(index, childToCompare)
-			index = childToCompare
-			l, r = left(index), right(index)
-		} else {
-			return
+		newNode.next = currentNode.next
+		newNode.prev = currentNode
+		currentNode.next.prev = newNode
+		currentNode.next = newNode
+
+		dl.len++
+	}
+
+	return nil
+}
+
+func (dl *DoublyLinkedList) Delete(index int) (*Value, error) {
+	if index < 0 || index >= dl.len {
+		return nil, fmt.Errorf("index out of range")
+	}
+
+	if index == 0 {
+		return dl.DeleteHead()
+	} else if index == dl.len-1 {
+		return dl.DeleteTail()
+	} else {
+		currentNode := dl.head
+		currentIndex := 0
+
+		// Traverse to the node at the given index
+		for currentIndex < index {
+			currentNode = currentNode.next
+			currentIndex++
 		}
+
+		currentNode.prev.next = currentNode.next
+		currentNode.next.prev = currentNode.prev
+		dl.len--
+
+		return currentNode.value, nil
 	}
 }
 
-// maxHeapifyUp will heapify from bottom to top
-func (h *MaxHeap) maxHeapifyUp(index int) {
-	for h.array[parent(index)] < h.array[index] {
-		h.swap(parent(index), index)
-		index = parent(index)
+func (dl *DoublyLinkedList) DeleteHead() (*Value, error) {
+	if dl.head == nil {
+		return nil, fmt.Errorf("cannot delete from empty list")
 	}
+
+	value := dl.head.value
+	dl.head = dl.head.next
+
+	if dl.head == nil {
+		dl.tail = nil
+	} else {
+		dl.head.prev = nil
+	}
+
+	dl.len--
+
+	return value, nil
 }
 
-func parent(i int) int {
-	return (i - 1) / 2
+func (dl *DoublyLinkedList) DeleteTail() (*Value, error) {
+	if dl.tail == nil {
+		return nil, fmt.Errorf("cannot delete from empty list")
+	}
+
+	value := dl.tail.value
+	dl.tail = dl.tail.prev
+
+	if dl.tail == nil {
+		dl.head = nil
+	} else {
+		dl.tail.next = nil
+	}
+
+	dl.len--
+
+	return value, nil
 }
 
-func left(i int) int {
-	return 2*i + 1
+func (dl *DoublyLinkedList) Get(index int) (*Value, error) {
+	if index < 0 || index >= dl.len {
+		return nil, fmt.Errorf("index out of range")
+	}
+
+	currentNode := dl.head
+	currentIndex := 0
+
+	for currentNode != nil {
+		if currentIndex == index {
+			return currentNode.value, nil
+		}
+
+		currentNode = currentNode.next
+		currentIndex++
+	}
+
+	return nil, fmt.Errorf("index out of range")
 }
 
-func right(i int) int {
-	return 2*i + 2
+func (dl *DoublyLinkedList) Reverse() {
+	if dl.head == nil || dl.head.next == nil {
+		// Empty list or single node, no need to reverse
+		return
+	}
+
+	currentNode := dl.head
+	var prevNode *Node
+
+	for currentNode != nil {
+		nextNode := currentNode.next
+		currentNode.next = prevNode
+		currentNode.prev = nextNode
+		prevNode = currentNode
+		currentNode = nextNode
+	}
+
+	dl.head, dl.tail = dl.tail, dl.head
 }
 
-// swap keys in the array at index i and j
-func (h *MaxHeap) swap(i, j int) {
-	h.array[i], h.array[j] = h.array[j], h.array[i]
+func (dl *DoublyLinkedList) ToArray() []*Value {
+	values := make([]*Value, 0, dl.len)
+	currentNode := dl.head
+
+	for currentNode != nil {
+		values = append(values, currentNode.value)
+		currentNode = currentNode.next
+	}
+
+	return values
+}
+
+func (dll *DoublyLinkedList) Clear() {
+	dll.head = nil
+	dll.tail = nil
+	dll.len = 0
+}
+
+func (dl *DoublyLinkedList) PrintData() {
+	if dl.head == nil {
+		fmt.Println("DoublyLinkedList is empty")
+		return
+	}
+
+	values := dl.ToArray()
+
+	fmt.Print("Data: ")
+	for _, value := range values {
+		fmt.Printf("%v ", value.data)
+	}
+	fmt.Println()
+	fmt.Printf("Length: %d\n", dl.len)
 }
 
 func main() {
-	m := &MaxHeap{}
-	fmt.Println(m)
-	buildHeap := []int{10, 20, 30, 5, 7, 9, 11, 13, 15, 17}
-	for _, v := range buildHeap {
-		m.Insert(v)
-		fmt.Println(m)
+	dl := &DoublyLinkedList{}
+
+	fmt.Printf("Is doubly linked list empty? %t\n", dl.head == nil)
+
+	values := []int{5, 10, 15, 20, 25, 30, 35, 40}
+
+	for _, value := range values {
+		dl.Append(&Value{data: value})
 	}
 
-	for i := 0; i < 9; i++ {
-		fmt.Println(m.Extract())
-		fmt.Println(m)
+	fmt.Println("...Appended values to the doubly linked list")
+
+	fmt.Printf("Is doubly linked list empty? %t\n", dl.head == nil)
+
+	fmt.Println()
+	dl.PrintData()
+
+	// Insert a new value at index 3
+	err := dl.Insert(3, &Value{data: 99})
+	if err != nil {
+		fmt.Println("Insert Error:", err)
 	}
 
+	fmt.Println()
+	dl.PrintData()
+
+	// Delete at index 2
+	value, err := dl.Delete(2)
+	if err != nil {
+		fmt.Println("Delete Error:", err)
+	} else {
+		fmt.Printf("Deleted Value: %d\n", value.data)
+	}
+	fmt.Println()
+	dl.PrintData()
+
+	// Get value at index 1
+	index := 1
+	value, err = dl.Get(index)
+	if err != nil {
+		fmt.Printf("Get Error at index %d: %s\n", index, err)
+	} else {
+		fmt.Printf("Value at index %d: %d\n", index, value.data)
+	}
+	fmt.Println()
+
+	// Convert the doubly linked list to an array
+	array := dl.ToArray()
+	fmt.Println("Doubly Linked List as Array:")
+	for i, value := range array {
+		fmt.Printf("Index %d: %d\n", i, value.data)
+	}
+	fmt.Println()
+
+	// Reverse the doubly linked list
+	dl.Reverse()
+	fmt.Println()
+	dl.PrintData()
 }
