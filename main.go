@@ -1,100 +1,119 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
-// MaxHeap struct has a slice that holds the array
-type MaxHeap struct {
-	array []int
+type Value struct {
+	data int
 }
 
-// Insert adds an element to the heap
-func (h *MaxHeap) Insert(key int) {
-	h.array = append(h.array, key)
-	h.maxHeapifyUp(len(h.array) - 1)
+type Node struct {
+	value *Value
+	next  *Node
 }
 
-// Extract returns the largest key, and removes it from the heap
-func (h *MaxHeap) Extract() int {
-	extracted := h.array[0]
+type Stack struct {
+	top *Node
+	len int
+}
 
-	l := len(h.array) - 1
+func NewStack() *Stack {
+	return &Stack{}
+}
 
-	if len(h.array) == 0 {
-		fmt.Println("cannot extract because array length is 0")
-		return -1
+func (s *Stack) push(data *Value) {
+	newNode := &Node{value: data, next: s.top}
+	s.top = newNode
+	s.len++
+}
+
+func (s *Stack) pop() (*Value, error) {
+	if s.top == nil {
+		return nil, fmt.Errorf("cannot pop from empty stack")
 	}
 
-	h.array[0] = h.array[l] // swap first and last
-	h.array = h.array[:l]   // makes the slice smaller by one
+	value := s.top.value
+	s.top = s.top.next
+	s.len--
 
-	h.maxHeapifyDown(0)
-
-	return extracted
+	return value, nil
 }
 
-// maxHeapifyDown will heapify from top to bottom
-func (h *MaxHeap) maxHeapifyDown(index int) {
-	lastIndex := len(h.array) - 1
-	l, r := left(index), right(index)
-	childToCompare := 0
-
-	for l <= lastIndex { // if left child exists
-		if l == lastIndex { // if right child doesn't exist
-			childToCompare = l
-		} else if h.array[l] > h.array[r] { // if left child is larger
-			childToCompare = l
-		} else { // if right child is larger
-			childToCompare = r
-		}
-
-		// compare array value of current index to larger child and swap if smaller
-		if h.array[index] < h.array[childToCompare] {
-			h.swap(index, childToCompare)
-			index = childToCompare
-			l, r = left(index), right(index)
-		} else {
-			return
-		}
+func (s *Stack) peek() (*Value, error) {
+	if s.top == nil {
+		return nil, fmt.Errorf("cannot peek an empty stack")
 	}
+
+	return s.top.value, nil
 }
 
-// maxHeapifyUp will heapify from bottom to top
-func (h *MaxHeap) maxHeapifyUp(index int) {
-	for h.array[parent(index)] < h.array[index] {
-		h.swap(parent(index), index)
-		index = parent(index)
+func (s *Stack) isEmpty() bool {
+	return s.top == nil
+}
+
+func (s *Stack) clear() {
+	s.top = nil
+	s.len = 0
+}
+
+func (s *Stack) String() string {
+	if s.top == nil {
+		return "Stack is empty"
 	}
-}
 
-func parent(i int) int {
-	return (i - 1) / 2
-}
+	var builder strings.Builder
+	currentNode := s.top
 
-func left(i int) int {
-	return 2*i + 1
-}
+	for currentNode != nil {
+		fmt.Fprintf(&builder, "%v ", currentNode.value.data)
+		currentNode = currentNode.next
+	}
 
-func right(i int) int {
-	return 2*i + 2
-}
-
-// swap keys in the array at index i and j
-func (h *MaxHeap) swap(i, j int) {
-	h.array[i], h.array[j] = h.array[j], h.array[i]
+	return builder.String()
 }
 
 func main() {
-	m := &MaxHeap{}
-	fmt.Println(m)
-	buildHeap := []int{10, 20, 30, 5, 7, 9, 11, 13, 15, 17}
-	for _, v := range buildHeap {
-		m.Insert(v)
-		fmt.Println(m)
+	stack := NewStack()
+
+	fmt.Printf("Is stack empty? %t\n", stack.isEmpty())
+
+	values := []int{5, 10, 15, 20, 25, 30, 35, 40}
+
+	for _, value := range values {
+		stack.push(&Value{data: value})
 	}
 
-	for i := 0; i < 9; i++ {
-		fmt.Println(m.Extract())
-		fmt.Println(m)
-	}
+	fmt.Println("...Pushed values to the stack")
 
+	fmt.Printf("Is stack empty? %t\n", stack.isEmpty())
+
+	fmt.Printf("Stack: %s\n", stack)
+
+	// Pop the top value
+	value, err := stack.pop()
+	fmt.Println()
+	if err != nil {
+		fmt.Println("Pop Error:", err)
+	} else {
+		fmt.Printf("Popped Value: %d\n", value.data)
+	}
+	fmt.Printf("Stack: %s\n", stack)
+
+	// Peek the top value
+	value, err = stack.peek()
+	fmt.Println()
+	if err != nil {
+		fmt.Println("Peek Error:", err)
+	} else {
+		fmt.Printf("Peeked Value: %d\n", value.data)
+	}
+	fmt.Printf("Stack: %s\n", stack)
+
+	// Clear the stack
+	fmt.Println()
+	stack.clear()
+	fmt.Println()
+	fmt.Printf("Stack: %s\n", stack)
 }
