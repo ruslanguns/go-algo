@@ -103,6 +103,18 @@ func (l *LinkedList) pop() (*Value, error) {
 	return currentNode.value, nil
 }
 
+func (l *LinkedList) shift() (*Value, error) {
+	if l.head == nil {
+		return nil, fmt.Errorf("cannot shift from empty list")
+	}
+
+	removedNode := l.head
+	l.head = l.head.next
+	l.len--
+
+	return removedNode.value, nil
+}
+
 func (l *LinkedList) search(data *Value) (int, error) {
 	if l.head == nil {
 		return -1, fmt.Errorf("cannot search empty list")
@@ -215,12 +227,21 @@ func main() {
 		fmt.Printf("Value %d found at index %d\n", valueToSearch, index)
 	}
 
+	// Shift the first value
+	value, err = list.shift()
+	fmt.Println()
+	if err != nil {
+		fmt.Println("Shift Error:", err)
+	} else {
+		fmt.Printf("Shifted Value: %d\n", value.data)
+	}
+	list.printData()
+
 	// Search for a value that does not exist
 	valueToSearch = 100
 	index, err = list.search(&Value{data: valueToSearch})
-	fmt.Println()
 	if err != nil {
-		fmt.Printf("Search Error: %s\n", err)
+		fmt.Printf("Error on search index %d: %s\n", valueToSearch, err)
 	} else {
 		fmt.Printf("Value %d found at index %d\n", valueToSearch, index)
 	}
