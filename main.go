@@ -142,7 +142,7 @@ func (l *LinkedList) delete(index int) (*Value, error) {
 	}
 }
 
-func (l *LinkedList) searchFirst(data *Value) (int, error) {
+func (l *LinkedList) firstIndexOf(data *Value) (int, error) {
 	if l.head == nil {
 		return -1, fmt.Errorf("cannot search empty list")
 	}
@@ -162,7 +162,7 @@ func (l *LinkedList) searchFirst(data *Value) (int, error) {
 	return -1, fmt.Errorf("value not found")
 }
 
-func (l *LinkedList) traverseIndex(index int) (*Value, error) {
+func (l *LinkedList) get(index int) (*Value, error) {
 	if index < 0 || index >= l.len {
 		return nil, fmt.Errorf("index out of range")
 	}
@@ -180,6 +180,24 @@ func (l *LinkedList) traverseIndex(index int) (*Value, error) {
 	}
 
 	return nil, fmt.Errorf("index out of range")
+}
+
+func (l *LinkedList) contains(data *Value) bool {
+	if l.head == nil {
+		return false
+	}
+
+	currentNode := l.head
+
+	for currentNode != nil {
+		if currentNode.value.data == data.data {
+			return true
+		}
+
+		currentNode = currentNode.next
+	}
+
+	return false
 }
 
 func (l *LinkedList) isEmpty() bool {
@@ -228,7 +246,7 @@ func main() {
 
 	idxToSearch := []int{4, 7, 10, 20}
 	for _, index := range idxToSearch {
-		value, err := list.traverseIndex(index)
+		value, err := list.get(index)
 		if err != nil {
 			fmt.Printf("Value at index %d: %s\n", index, err)
 		} else {
@@ -270,7 +288,7 @@ func main() {
 
 	// Search for a value
 	valueToSearch := 99
-	index, err := list.searchFirst(&Value{data: valueToSearch})
+	index, err := list.firstIndexOf(&Value{data: valueToSearch})
 	fmt.Println()
 	if err != nil {
 		fmt.Printf("Search Error: %s\n", err)
@@ -280,7 +298,7 @@ func main() {
 
 	// Search for a value that does not exist
 	valueToSearch = 100
-	index, err = list.searchFirst(&Value{data: valueToSearch})
+	index, err = list.firstIndexOf(&Value{data: valueToSearch})
 	if err != nil {
 		fmt.Printf("Error on search index %d: %s\n", valueToSearch, err)
 	} else {
@@ -296,7 +314,7 @@ func main() {
 
 	// Search for a value that exists multiple times
 	valueToSearch = 100
-	index, err = list.searchFirst(&Value{data: valueToSearch})
+	index, err = list.firstIndexOf(&Value{data: valueToSearch})
 	if err != nil {
 		fmt.Printf("Error on search index %d: %s\n", valueToSearch, err)
 	} else {
@@ -314,8 +332,16 @@ func main() {
 	}
 	list.printData()
 
+	// Contains 100?
+	fmt.Println()
+	fmt.Printf("Contains 100? %t\n", list.contains(&Value{data: 100}))
+
 	// clear the list
 	list.clear()
 	fmt.Println()
 	list.printData()
+
+	// Contains 100?
+	fmt.Println()
+	fmt.Printf("Contains 100? %t\n", list.contains(&Value{data: 100}))
 }
