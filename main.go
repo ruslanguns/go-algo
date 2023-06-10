@@ -19,6 +19,16 @@ func (l *linkedList) prepend(data int) {
 	l.len++
 }
 
+func (l linkedList) printListData() {
+	toPrint := l.head
+	for l.len != 0 {
+		fmt.Printf("%d ", toPrint.data)
+		toPrint = toPrint.next
+		l.len--
+	}
+	fmt.Println()
+}
+
 func main() {
 	myLinkedList := linkedList{}
 	myLinkedList.prepend(5)
@@ -30,5 +40,6 @@ func main() {
 	myLinkedList.prepend(35)
 	myLinkedList.prepend(40)
 
-	fmt.Println(myLinkedList)
+	myLinkedList.printListData()
+	fmt.Printf("Length: %d\n", myLinkedList.len)
 }
