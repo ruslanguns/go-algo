@@ -3,14 +3,6 @@ package main
 import "fmt"
 
 type Value struct {
-	// Define fields based on your requirements for the value object
-	// For example, if you want to store an integer value:
-	// data int
-	//
-	// Or, if you want to store a string value:
-	// data string
-	//
-	// You can customize the fields based on the specific data type you need.
 	data int
 }
 
@@ -210,18 +202,29 @@ func (l *LinkedList) clear() {
 	l.len = 0
 }
 
+func (l *LinkedList) toArray() []*Value {
+	values := make([]*Value, 0, l.len)
+	currentNode := l.head
+
+	for currentNode != nil {
+		values = append(values, currentNode.value)
+		currentNode = currentNode.next
+	}
+
+	return values
+}
+
 func (l *LinkedList) printData() {
 	if l.head == nil {
 		fmt.Println("LinkedList is empty")
 		return
 	}
 
-	currentNode := l.head
+	values := l.toArray()
 
 	fmt.Print("Data: ")
-	for currentNode != nil {
-		fmt.Printf("%v ", currentNode.value.data)
-		currentNode = currentNode.next
+	for _, value := range values {
+		fmt.Printf("%v ", value.data)
 	}
 	fmt.Println()
 	fmt.Printf("Length: %d\n", l.len)
@@ -237,6 +240,8 @@ func main() {
 		list.prepend(&Value{data: index})
 	}
 
+	fmt.Println("...Prepended data")
+
 	fmt.Printf("Is list empty? %t\n", list.isEmpty())
 
 	idxToAppend := []int{60, 65, 70}
@@ -244,13 +249,14 @@ func main() {
 		list.append(&Value{data: index})
 	}
 
+	fmt.Println()
 	idxToSearch := []int{4, 7, 10, 20}
 	for _, index := range idxToSearch {
 		value, err := list.get(index)
 		if err != nil {
-			fmt.Printf("Value at index %d: %s\n", index, err)
+			fmt.Printf("Not Found index %d: %s\n", index, err)
 		} else {
-			fmt.Printf("Value at index %d: %d\n", index, value.data)
+			fmt.Printf("Found index %d: %d\n", index, value.data)
 		}
 	}
 
@@ -305,22 +311,6 @@ func main() {
 		fmt.Printf("Value %d found at index %d\n", valueToSearch, index)
 	}
 
-	// Add 100 to the end of the list two times
-	list.append(&Value{data: 100})
-	list.append(&Value{data: 100})
-
-	fmt.Println("Added 100 two times to the end of the list")
-	list.printData()
-
-	// Search for a value that exists multiple times
-	valueToSearch = 100
-	index, err = list.firstIndexOf(&Value{data: valueToSearch})
-	if err != nil {
-		fmt.Printf("Error on search index %d: %s\n", valueToSearch, err)
-	} else {
-		fmt.Printf("Value %d found at index %d\n", valueToSearch, index)
-	}
-
 	// Delete at index 3
 	fmt.Println()
 	list.printData()
@@ -337,6 +327,7 @@ func main() {
 	fmt.Printf("Contains 100? %t\n", list.contains(&Value{data: 100}))
 
 	// clear the list
+	fmt.Println()
 	list.clear()
 	fmt.Println()
 	list.printData()
