@@ -53,6 +53,36 @@ func (l *LinkedList) append(data *Value) {
 	l.len++
 }
 
+func (l *LinkedList) insert(index int, data *Value) error {
+	if (index < 0 || index >= l.len) && l.len > 0 {
+		return fmt.Errorf("index out of range")
+	}
+
+	if index == 0 {
+		l.prepend(data)
+	} else if index == l.len-1 {
+		l.append(data)
+	} else {
+		newNode := &Node{value: data, next: nil}
+
+		currentNode := l.head
+		currentIndex := 0
+
+		// Traverse to the node before the index
+		for currentIndex < index-1 {
+			currentNode = currentNode.next
+			currentIndex++
+		}
+
+		newNode.next = currentNode.next
+		currentNode.next = newNode
+
+		l.len++
+	}
+
+	return nil
+}
+
 func (l *LinkedList) traverseIndex(index int) (*Value, error) {
 	if index < 0 || index >= l.len {
 		return nil, fmt.Errorf("index out of range")
@@ -110,6 +140,16 @@ func main() {
 		} else {
 			fmt.Printf("Value at index %d: %d\n", index, value.data)
 		}
+	}
+
+	fmt.Println()
+	list.printData()
+	fmt.Printf("Length: %d\n", list.len)
+
+	// Insert a new value at index 3
+	err := list.insert(3, &Value{data: 99})
+	if err != nil {
+		fmt.Println("Insert Error:", err)
 	}
 
 	fmt.Println()
