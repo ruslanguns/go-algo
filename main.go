@@ -1,100 +1,162 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
-// MaxHeap struct has a slice that holds the array
-type MaxHeap struct {
-	array []int
+type Value struct {
+	data int
 }
 
-// Insert adds an element to the heap
-func (h *MaxHeap) Insert(key int) {
-	h.array = append(h.array, key)
-	h.maxHeapifyUp(len(h.array) - 1)
+type Node struct {
+	value *Value
+	next  *Node
+	prev  *Node
 }
 
-// Extract returns the largest key, and removes it from the heap
-func (h *MaxHeap) Extract() int {
-	extracted := h.array[0]
+type Deque struct {
+	front *Node
+	rear  *Node
+	len   int
+}
 
-	l := len(h.array) - 1
+func NewDeque() *Deque {
+	return &Deque{}
+}
 
-	if len(h.array) == 0 {
-		fmt.Println("cannot extract because array length is 0")
-		return -1
+func (d *Deque) insertFront(data *Value) {
+	newNode := &Node{value: data, next: d.front, prev: nil}
+
+	if d.front == nil {
+		d.front = newNode
+		d.rear = newNode
+	} else {
+		d.front.prev = newNode
+		d.front = newNode
 	}
 
-	h.array[0] = h.array[l] // swap first and last
-	h.array = h.array[:l]   // makes the slice smaller by one
-
-	h.maxHeapifyDown(0)
-
-	return extracted
+	d.len++
 }
 
-// maxHeapifyDown will heapify from top to bottom
-func (h *MaxHeap) maxHeapifyDown(index int) {
-	lastIndex := len(h.array) - 1
-	l, r := left(index), right(index)
-	childToCompare := 0
+func (d *Deque) insertLast(data *Value) {
+	newNode := &Node{value: data, next: nil, prev: d.rear}
 
-	for l <= lastIndex { // if left child exists
-		if l == lastIndex { // if right child doesn't exist
-			childToCompare = l
-		} else if h.array[l] > h.array[r] { // if left child is larger
-			childToCompare = l
-		} else { // if right child is larger
-			childToCompare = r
-		}
-
-		// compare array value of current index to larger child and swap if smaller
-		if h.array[index] < h.array[childToCompare] {
-			h.swap(index, childToCompare)
-			index = childToCompare
-			l, r = left(index), right(index)
-		} else {
-			return
-		}
+	if d.rear == nil {
+		d.front = newNode
+		d.rear = newNode
+	} else {
+		d.rear.next = newNode
+		d.rear = newNode
 	}
+
+	d.len++
 }
 
-// maxHeapifyUp will heapify from bottom to top
-func (h *MaxHeap) maxHeapifyUp(index int) {
-	for h.array[parent(index)] < h.array[index] {
-		h.swap(parent(index), index)
-		index = parent(index)
+func (d *Deque) deleteFront() (*Value, error) {
+	if d.front == nil {
+		return nil, fmt.Errorf("cannot delete from empty deque")
 	}
+
+	value := d.front.value
+	d.front = d.front.next
+
+	if d.front == nil {
+		d.rear = nil
+	} else {
+		d.front.prev = nil
+	}
+
+	d.len--
+
+	return value, nil
 }
 
-func parent(i int) int {
-	return (i - 1) / 2
+func (d *Deque) deleteLast() (*Value, error) {
+	if d.rear == nil {
+		return nil, fmt.Errorf("cannot delete from empty deque")
+	}
+
+	value := d.rear.value
+	d.rear = d.rear.prev
+
+	if d.rear == nil {
+		d.front = nil
+	} else {
+		d.rear.next = nil
+	}
+
+	d.len--
+
+	return value, nil
 }
 
-func left(i int) int {
-	return 2*i + 1
+func (d *Deque) isEmpty() bool {
+	return d.front == nil
 }
 
-func right(i int) int {
-	return 2*i + 2
+func (d *Deque) clear() {
+	d.front = nil
+	d.rear = nil
+	d.len = 0
 }
 
-// swap keys in the array at index i and j
-func (h *MaxHeap) swap(i, j int) {
-	h.array[i], h.array[j] = h.array[j], h.array[i]
+func (d *Deque) String() string {
+	if d.front == nil {
+		return "Deque is empty"
+	}
+
+	currentNode := d.front
+	var result string
+
+	for currentNode != nil {
+		result += fmt.Sprintf("%v ", currentNode.value.data)
+		currentNode = currentNode.next
+	}
+
+	return result
 }
 
 func main() {
-	m := &MaxHeap{}
-	fmt.Println(m)
-	buildHeap := []int{10, 20, 30, 5, 7, 9, 11, 13, 15, 17}
-	for _, v := range buildHeap {
-		m.Insert(v)
-		fmt.Println(m)
+	deque := NewDeque()
+
+	fmt.Printf("Is deque empty? %t\n", deque.isEmpty())
+
+	values := []int{5, 10, 15, 20, 25, 30, 35, 40}
+
+	for _, value := range values {
+		deque.insertLast(&Value{data: value})
 	}
 
-	for i := 0; i < 9; i++ {
-		fmt.Println(m.Extract())
-		fmt.Println(m)
-	}
+	fmt.Println("...Inserted values into the deque")
 
+	fmt.Printf("Is deque empty? %t\n", deque.isEmpty())
+
+	fmt.Printf("Deque: %s\n", deque)
+
+	// Delete from the front
+	value, err := deque.deleteFront()
+	fmt.Println()
+	if err != nil {
+		fmt.Println("Delete Front Error:", err)
+	} else {
+		fmt.Printf("Deleted Value from Front: %d\n", value.data)
+	}
+	fmt.Printf("Deque: %s\n", deque)
+
+	// Delete from the last
+	value, err = deque.deleteLast()
+	fmt.Println()
+	if err != nil {
+		fmt.Println("Delete Last Error:", err)
+	} else {
+		fmt.Printf("Deleted Value from Last: %d\n", value.data)
+	}
+	fmt.Printf("Deque: %s\n", deque)
+
+	// Clear the deque
+	fmt.Println()
+	deque.clear()
+	fmt.Printf("Deque: %s\n", deque)
+
+	fmt.Printf("Is deque empty? %t\n", deque.isEmpty())
 }
