@@ -24,7 +24,7 @@ func NewLinkedList() *LinkedList {
 	return &LinkedList{}
 }
 
-func (l *LinkedList) prepend(data *Value) {
+func (l *LinkedList) Prepend(data *Value) {
 	newNode := &Node{value: data, next: nil}
 
 	if l.head == nil {
@@ -38,7 +38,7 @@ func (l *LinkedList) prepend(data *Value) {
 	l.len++
 }
 
-func (l *LinkedList) append(data *Value) {
+func (l *LinkedList) Append(data *Value) {
 	newNode := &Node{value: data, next: nil}
 
 	if l.head == nil {
@@ -52,15 +52,15 @@ func (l *LinkedList) append(data *Value) {
 	l.len++
 }
 
-func (l *LinkedList) insert(index int, data *Value) error {
+func (l *LinkedList) Insert(index int, data *Value) error {
 	if (index < 0 || index >= l.len) && l.len > 0 {
 		return fmt.Errorf("index out of range")
 	}
 
 	if index == 0 {
-		l.prepend(data)
+		l.Prepend(data)
 	} else if index == l.len-1 {
-		l.append(data)
+		l.Append(data)
 	} else {
 		newNode := &Node{value: data, next: nil}
 
@@ -82,7 +82,7 @@ func (l *LinkedList) insert(index int, data *Value) error {
 	return nil
 }
 
-func (l *LinkedList) pop() (*Value, error) {
+func (l *LinkedList) Pop() (*Value, error) {
 	if l.head == nil {
 		return nil, fmt.Errorf("cannot pop from empty list")
 	}
@@ -108,7 +108,7 @@ func (l *LinkedList) pop() (*Value, error) {
 	return removedNode.value, nil
 }
 
-func (l *LinkedList) shift() (*Value, error) {
+func (l *LinkedList) Shift() (*Value, error) {
 	if l.head == nil {
 		return nil, fmt.Errorf("cannot shift from empty list")
 	}
@@ -124,13 +124,13 @@ func (l *LinkedList) shift() (*Value, error) {
 	return removedNode.value, nil
 }
 
-func (l *LinkedList) delete(index int) (*Value, error) {
+func (l *LinkedList) Delete(index int) (*Value, error) {
 	if index < 0 || index >= l.len {
 		return nil, fmt.Errorf("index out of range")
 	}
 
 	if index == 0 {
-		return l.shift()
+		return l.Shift()
 	}
 
 	currentNode := l.head
@@ -154,7 +154,7 @@ func (l *LinkedList) delete(index int) (*Value, error) {
 	return removedNode.value, nil
 }
 
-func (l *LinkedList) firstIndexOf(data *Value) (int, error) {
+func (l *LinkedList) FirstIndexOf(data *Value) (int, error) {
 	if l.head == nil {
 		return -1, fmt.Errorf("cannot search empty list")
 	}
@@ -174,7 +174,7 @@ func (l *LinkedList) firstIndexOf(data *Value) (int, error) {
 	return -1, fmt.Errorf("value not found")
 }
 
-func (l *LinkedList) get(index int) (*Value, error) {
+func (l *LinkedList) Get(index int) (*Value, error) {
 	if index < 0 || index > l.len-1 {
 		return nil, fmt.Errorf("index out of range")
 	}
@@ -190,22 +190,22 @@ func (l *LinkedList) get(index int) (*Value, error) {
 	return currentNode.value, nil
 }
 
-func (l *LinkedList) contains(data *Value) bool {
-	_, err := l.firstIndexOf(data)
+func (l *LinkedList) Contains(data *Value) bool {
+	_, err := l.FirstIndexOf(data)
 	return err == nil
 }
 
-func (l *LinkedList) isEmpty() bool {
+func (l *LinkedList) IsEmpty() bool {
 	return l.len == 0
 }
 
-func (l *LinkedList) clear() {
+func (l *LinkedList) Clear() {
 	l.head = nil
 	l.tail = nil
 	l.len = 0
 }
 
-func (l *LinkedList) toArray() []*Value {
+func (l *LinkedList) ToArray() []*Value {
 	values := make([]*Value, l.len)
 	currentNode := l.head
 
@@ -217,7 +217,7 @@ func (l *LinkedList) toArray() []*Value {
 	return values
 }
 
-func (l *LinkedList) reverse() {
+func (l *LinkedList) Reverse() {
 	if l.head == nil || l.head.next == nil {
 		// Empty list or single node, no need to reverse
 		return
@@ -252,20 +252,20 @@ func (l *LinkedList) String() string {
 func main() {
 	list := NewLinkedList()
 
-	fmt.Printf("Is list empty? %t\n", list.isEmpty())
+	fmt.Printf("Is list empty? %t\n", list.IsEmpty())
 
 	idxToPrepend := []int{5, 10, 15, 20, 25, 30, 35, 40}
 	for _, index := range idxToPrepend {
-		list.prepend(&Value{data: index})
+		list.Prepend(&Value{data: index})
 	}
 
 	fmt.Println("...Prepended data")
 
-	fmt.Printf("Is list empty? %t\n", list.isEmpty())
+	fmt.Printf("Is list empty? %t\n", list.IsEmpty())
 
 	idxToAppend := []int{60, 65, 70}
 	for _, index := range idxToAppend {
-		list.append(&Value{data: index})
+		list.Append(&Value{data: index})
 	}
 
 	fmt.Println()
@@ -274,7 +274,7 @@ func main() {
 	fmt.Println()
 	idxToSearch := []int{4, 7, 9, 10, 20}
 	for _, index := range idxToSearch {
-		value, err := list.get(index)
+		value, err := list.Get(index)
 		if err != nil {
 			fmt.Printf("Not Found index %d: %s\n", index, err)
 		} else {
@@ -286,7 +286,7 @@ func main() {
 	fmt.Printf("Data: %s\n", list)
 
 	// Insert a new value at index 3
-	err := list.insert(3, &Value{data: 99})
+	err := list.Insert(3, &Value{data: 99})
 	if err != nil {
 		fmt.Println("Insert Error:", err)
 	}
@@ -295,7 +295,7 @@ func main() {
 	fmt.Printf("Data: %s\n", list)
 
 	// Pop the last value
-	value, err := list.pop()
+	value, err := list.Pop()
 	fmt.Println()
 	if err != nil {
 		fmt.Println("Pop Error:", err)
@@ -305,7 +305,7 @@ func main() {
 	fmt.Printf("Data: %s\n", list)
 
 	// Shift the first value
-	value, err = list.shift()
+	value, err = list.Shift()
 	fmt.Println()
 	if err != nil {
 		fmt.Println("Shift Error:", err)
@@ -316,7 +316,7 @@ func main() {
 
 	// Search for a value
 	valueToSearch := 99
-	index, err := list.firstIndexOf(&Value{data: valueToSearch})
+	index, err := list.FirstIndexOf(&Value{data: valueToSearch})
 	fmt.Println()
 	if err != nil {
 		fmt.Printf("Search Error: %s\n", err)
@@ -326,7 +326,7 @@ func main() {
 
 	// Search for a value that does not exist
 	valueToSearch = 100
-	index, err = list.firstIndexOf(&Value{data: valueToSearch})
+	index, err = list.FirstIndexOf(&Value{data: valueToSearch})
 	if err != nil {
 		fmt.Printf("Error on search index %d: %s\n", valueToSearch, err)
 	} else {
@@ -336,7 +336,7 @@ func main() {
 	// Delete at index 3
 	fmt.Println()
 	fmt.Printf("Data: %s\n", list)
-	value, err = list.delete(3)
+	value, err = list.Delete(3)
 	if err != nil {
 		fmt.Println("Delete Error:", err)
 	} else {
@@ -346,28 +346,28 @@ func main() {
 
 	// Contains 100?
 	fmt.Println()
-	fmt.Printf("Contains 100? %t\n", list.contains(&Value{data: 100}))
+	fmt.Printf("Contains 100? %t\n", list.Contains(&Value{data: 100}))
 
 	// clear the list
 	fmt.Println()
-	list.clear()
+	list.Clear()
 	fmt.Println()
 	fmt.Printf("Data: %s\n", list)
 
 	// Contains 100?
 	fmt.Println()
-	fmt.Printf("Contains 100? %t\n", list.contains(&Value{data: 100}))
+	fmt.Printf("Contains 100? %t\n", list.Contains(&Value{data: 100}))
 
 	// Add some values to the list 1 to 10
 	fmt.Println()
 	fmt.Println("...Adding values 1 to 10")
 	for i := 1; i <= 10; i++ {
-		list.append(&Value{data: i})
+		list.Append(&Value{data: i})
 	}
 	fmt.Printf("Data: %s\n", list)
 
 	// Reverse the list
 	fmt.Println()
-	list.reverse()
+	list.Reverse()
 	fmt.Printf("Data reversed: %s\n", list)
 }
