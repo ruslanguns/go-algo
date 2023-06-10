@@ -214,6 +214,26 @@ func (l *LinkedList) toArray() []*Value {
 	return values
 }
 
+func (l *LinkedList) reverse() {
+	if l.head == nil || l.head.next == nil {
+		// Empty list or single node, no need to reverse
+		return
+	}
+
+	var prevNode *Node
+	currentNode := l.head
+	l.tail = l.head
+
+	for currentNode != nil {
+		nextNode := currentNode.next
+		currentNode.next = prevNode
+		prevNode = currentNode
+		currentNode = nextNode
+	}
+
+	l.head = prevNode
+}
+
 func (l *LinkedList) printData() {
 	if l.head == nil {
 		fmt.Println("LinkedList is empty")
@@ -335,4 +355,17 @@ func main() {
 	// Contains 100?
 	fmt.Println()
 	fmt.Printf("Contains 100? %t\n", list.contains(&Value{data: 100}))
+
+	// Add some values to the list 1 to 10
+	fmt.Println()
+	fmt.Println("...Adding values 1 to 10")
+	for i := 1; i <= 10; i++ {
+		list.append(&Value{data: i})
+	}
+	list.printData()
+
+	// Reverse the list
+	fmt.Println()
+	list.reverse()
+	list.printData()
 }
