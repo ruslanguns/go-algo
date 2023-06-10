@@ -186,6 +186,12 @@ func (l *LinkedList) isEmpty() bool {
 	return l.head == nil
 }
 
+func (l *LinkedList) clear() {
+	l.head = nil
+	l.tail = nil
+	l.len = 0
+}
+
 func (l *LinkedList) printData() {
 	if l.head == nil {
 		fmt.Println("LinkedList is empty")
@@ -306,5 +312,10 @@ func main() {
 	} else {
 		fmt.Printf("Deleted Value: %d\n", value.data)
 	}
+	list.printData()
+
+	// clear the list
+	list.clear()
+	fmt.Println()
 	list.printData()
 }
