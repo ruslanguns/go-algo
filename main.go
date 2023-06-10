@@ -2,27 +2,49 @@ package main
 
 import "fmt"
 
-type node struct {
-	data int
-	next *node
+type Node struct {
+	value int
+	next  *Node
 }
 
-type linkedList struct {
-	head *node
+type LinkedList struct {
+	head *Node
+	tail *Node
 	len  int
 }
 
-func (l *linkedList) prepend(data int) {
-	newNode := node{data: data}
-	newNode.next = l.head
-	l.head = &newNode
+func (l *LinkedList) prepend(data int) {
+	newNode := &Node{value: data, next: nil}
+
+	if l.head == nil {
+		l.head = newNode
+		l.tail = newNode
+	} else {
+		newNode.next = l.head
+		l.head = newNode
+	}
+
 	l.len++
 }
 
-func (l linkedList) printListData() {
+func (l *LinkedList) append(data int) {
+	newNode := &Node{value: data, next: nil}
+
+	if l.head == nil {
+		l.head = newNode
+		l.tail = newNode
+	} else {
+		l.tail.next = newNode
+		l.tail = newNode
+	}
+
+	l.len++
+}
+
+func (l LinkedList) printListData() {
 	toPrint := l.head
 	for l.len != 0 {
-		fmt.Printf("%d ", toPrint.data)
+		fmt.Printf("%d ", toPrint.value)
 		toPrint = toPrint.next
 		l.len--
 	}
@@ -30,15 +52,19 @@ func (l linkedList) printListData() {
 }
 
 func main() {
-	myLinkedList := linkedList{}
-	myLinkedList.prepend(5)
+	myLinkedList := LinkedList{}
+	// myLinkedList.prepend(5)
+	// myLinkedList.prepend(10)
+	// myLinkedList.prepend(15)
+	// myLinkedList.prepend(20)
+	// myLinkedList.prepend(25)
+	// myLinkedList.prepend(30)
+	// myLinkedList.prepend(35)
+	// myLinkedList.prepend(40)
+
+	myLinkedList.append(45)
 	myLinkedList.prepend(10)
-	myLinkedList.prepend(15)
-	myLinkedList.prepend(20)
-	myLinkedList.prepend(25)
-	myLinkedList.prepend(30)
-	myLinkedList.prepend(35)
-	myLinkedList.prepend(40)
+	myLinkedList.prepend(5)
 
 	myLinkedList.printListData()
 	fmt.Printf("Length: %d\n", myLinkedList.len)
