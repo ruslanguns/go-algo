@@ -53,18 +53,18 @@ func (l LinkedList) printListData() {
 
 func main() {
 	myLinkedList := LinkedList{}
-	// myLinkedList.prepend(5)
-	// myLinkedList.prepend(10)
-	// myLinkedList.prepend(15)
-	// myLinkedList.prepend(20)
-	// myLinkedList.prepend(25)
-	// myLinkedList.prepend(30)
-	// myLinkedList.prepend(35)
-	// myLinkedList.prepend(40)
+	myLinkedList.prepend(5)
+	myLinkedList.prepend(10)
+	myLinkedList.prepend(15)
+	myLinkedList.prepend(20)
+	myLinkedList.prepend(25)
+	myLinkedList.prepend(30)
+	myLinkedList.prepend(35)
+	myLinkedList.prepend(40)
 
 	myLinkedList.append(45)
-	myLinkedList.prepend(10)
-	myLinkedList.prepend(5)
+	myLinkedList.append(65)
+	myLinkedList.append(15)
 
 	myLinkedList.printListData()
 	fmt.Printf("Length: %d\n", myLinkedList.len)
