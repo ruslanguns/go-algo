@@ -103,6 +103,26 @@ func (l *LinkedList) pop() (*Value, error) {
 	return currentNode.value, nil
 }
 
+func (l *LinkedList) search(data *Value) (int, error) {
+	if l.head == nil {
+		return -1, fmt.Errorf("cannot search empty list")
+	}
+
+	currentNode := l.head
+	currentIndex := 0
+
+	for currentNode != nil {
+		if currentNode.value.data == data.data {
+			return currentIndex, nil
+		}
+
+		currentNode = currentNode.next
+		currentIndex++
+	}
+
+	return -1, fmt.Errorf("value not found")
+}
+
 func (l *LinkedList) traverseIndex(index int) (*Value, error) {
 	if index < 0 || index >= l.len {
 		return nil, fmt.Errorf("index out of range")
@@ -184,4 +204,24 @@ func main() {
 		fmt.Printf("Popped Value: %d\n", value.data)
 	}
 	list.printData()
+
+	// Search for a value
+	valueToSearch := 99
+	index, err := list.search(&Value{data: valueToSearch})
+	fmt.Println()
+	if err != nil {
+		fmt.Printf("Search Error: %s\n", err)
+	} else {
+		fmt.Printf("Value %d found at index %d\n", valueToSearch, index)
+	}
+
+	// Search for a value that does not exist
+	valueToSearch = 100
+	index, err = list.search(&Value{data: valueToSearch})
+	fmt.Println()
+	if err != nil {
+		fmt.Printf("Search Error: %s\n", err)
+	} else {
+		fmt.Printf("Value %d found at index %d\n", valueToSearch, index)
+	}
 }
